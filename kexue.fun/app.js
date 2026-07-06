@@ -14,6 +14,7 @@
       navLink("index.html", "首页", "home") +
       navLink("science.html", "科普知识", "science") +
       navLink("about.html", "关于我们", "about") +
+      navLink("https://lipeike2020.github.io/unicorn-growth-park/", "独角兽乐园", "unicorn") +
       "</nav>" +
       '<button id="menu-button" class="menu-button" type="button" aria-expanded="false" aria-label="打开菜单">菜单</button>' +
       "</div>" +
@@ -21,6 +22,7 @@
       navLink("index.html", "首页", "home") +
       navLink("science.html", "科普知识", "science") +
       navLink("about.html", "关于我们", "about") +
+      navLink("https://lipeike2020.github.io/unicorn-growth-park/", "独角兽乐园", "unicorn") +
       "</nav>" +
       "</header>"
     );
@@ -37,6 +39,7 @@
       "</a>"
     );
   }
+  
 
   function footerHtml() {
     return (
@@ -95,134 +98,3 @@
         button.textContent = open ? "菜单" : "关闭";
         button.classList.toggle("open", !open);
         mobileNav.hidden = open;
-      });
-    }
-  }
-
-  function mountHome() {
-    var container = document.getElementById("home-articles");
-    if (container) {
-      container.innerHTML = articles.slice(0, 3).map(articleCard).join("");
-    }
-  }
-
-  function mountScienceList() {
-    var list = document.getElementById("science-list");
-    var filters = document.getElementById("category-filters");
-    var search = document.getElementById("search-input");
-    var count = document.getElementById("result-count");
-    var empty = document.getElementById("empty-state");
-    if (!list || !filters || !search || !count || !empty) return;
-
-    var params = new URLSearchParams(window.location.search);
-    var selected = params.get("category") || "全部";
-    if (categories.indexOf(selected) === -1) selected = "全部";
-
-    filters.innerHTML = ["全部"].concat(categories).map(function (category) {
-      return (
-        '<button type="button" data-category="' +
-        category +
-        '" class="' +
-        (selected === category ? "selected" : "") +
-        '">' +
-        category +
-        "</button>"
-      );
-    }).join("");
-
-    function render() {
-      var query = search.value.trim().toLowerCase();
-      var results = articles.filter(function (article) {
-        var categoryMatch = selected === "全部" || article.category === selected;
-        var text = (article.title + article.summary).toLowerCase();
-        return categoryMatch && (!query || text.indexOf(query) !== -1);
-      });
-      count.textContent = "找到 " + results.length + " 个科学发现";
-      list.innerHTML = results.map(articleCard).join("");
-      list.hidden = results.length === 0;
-      empty.hidden = results.length !== 0;
-    }
-
-    filters.addEventListener("click", function (event) {
-      var target = event.target.closest("button[data-category]");
-      if (!target) return;
-      selected = target.dataset.category;
-      filters.querySelectorAll("button").forEach(function (button) {
-        button.classList.toggle("selected", button === target);
-      });
-      render();
-    });
-
-    search.addEventListener("input", render);
-    render();
-  }
-
-  function mountArticle() {
-    var root = document.getElementById("article-root");
-    if (!root) return;
-
-    var slug = new URLSearchParams(window.location.search).get("slug");
-    var article = articles.find(function (item) {
-      return item.slug === slug;
-    });
-
-    if (!article) {
-      root.innerHTML =
-        '<section class="not-found"><div><span>404</span><h1>这颗知识星球还没有被发现</h1><p>返回科普列表，继续寻找有趣的问题吧。</p><a class="button primary" href="science.html">返回科普知识</a></div></section>';
-      document.title = "没有找到文章 | kexue.fun";
-      return;
-    }
-
-    document.title = article.title + " | kexue.fun";
-
-    var sections = article.sections.map(function (section) {
-      var paragraphs = section.paragraphs.map(function (paragraph) {
-        return "<p>" + paragraph + "</p>";
-      }).join("");
-      var fact = section.fact
-        ? '<div class="fact-box"><span>科学小知识</span><p>' + section.fact + "</p></div>"
-        : "";
-      return "<section><h2>" + section.title + "</h2>" + paragraphs + fact + "</section>";
-    }).join("");
-
-    var related = articles.filter(function (item) {
-      return item.slug !== article.slug;
-    }).slice(0, 3);
-
-    root.innerHTML =
-      '<article class="article-page"><div class="container article-header">' +
-      '<a class="back-link" href="science.html">← 返回科普列表</a>' +
-      '<span class="article-category" style="color:' +
-      article.color +
-      '">' +
-      article.category +
-      "</span><h1>" +
-      article.title +
-      '</h1><p class="article-summary">' +
-      article.summary +
-      '</p><div class="article-meta"><span>适合 ' +
-      article.age +
-      "</span><span>阅读约 " +
-      article.readingTime +
-      '</span></div><div class="article-cover"><img src="' +
-      article.image +
-      '" alt="' +
-      article.imageAlt +
-      '"></div></div>' +
-      '<div class="container article-layout"><aside><span>先想一想</span><strong>' +
-      article.question +
-      '</strong></aside><div class="article-content"><p class="article-lead">' +
-      article.lead +
-      "</p>" +
-      sections +
-      "</div></div></article>" +
-      '<section class="section related"><div class="container"><div class="section-head compact"><div><span class="section-label">继续探索</span><h2>你可能还会喜欢</h2></div></div><div class="card-grid">' +
-      related.map(articleCard).join("") +
-      "</div></div></section>";
-  }
-
-  mountSharedLayout();
-  mountHome();
-  mountScienceList();
-  mountArticle();
-})();
